@@ -1,0 +1,244 @@
+﻿
+<!DOCTYPE html>
+
+<style>
+    #loadingScreen {
+        display: block;
+        position: fixed;
+        top: 30%;
+        left: 50%;
+        left: 0;
+        margin: 0 auto;
+        right: 0;
+        text-align: center;
+        width: 100%;
+        z-index: 5000;
+    }
+
+    #loadingContent {
+        background: #000 none repeat scroll 0 0;
+        border-radius: 10px;
+        color: #fff;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        min-height: 110px;
+        opacity: 0.6;
+        padding: 0 15px 15px;
+        width: 260px;
+    }
+</style>
+
+
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  
+
+    <link href="~/css/bootstrap.min.css" rel="stylesheet">
+    <link href="~/font-awesome/css/font-awesome.css" rel="stylesheet">
+
+    <!-- Toastr style -->
+    <link href="~/css/plugins/toastr/toastr.min.css" rel="stylesheet">
+
+    <!-- Gritter -->
+    <link href="~/js/plugins/gritter/jquery.gritter.css" rel="stylesheet">
+
+    <link href="~/css/animate.css" rel="stylesheet">
+    <link href="~/css/style.css" rel="stylesheet">
+    <link href="~/css/plugins/dataTables/datatables.min.css" rel="stylesheet">
+    <link href="~/css/plugins/datapicker/jquery.datetimepicker.css" rel="stylesheet">
+    <link href="~/css/plugins/select2/select2.min.css" rel="stylesheet">
+    <link href="~/css/plugins/dataTables/dataTables.checkboxes.css" rel="stylesheet">
+</head>
+
+
+
+
+
+
+
+
+
+<body>
+    <script src="~/js/core/jquery.min.js"></script>
+    <script src="~/js/plugins/datapicker/jquery.datetimepicker.full.min.js"></script>
+    <script src="~/js/plugins/select2/select2.min.js"></script>
+
+    @*<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>*@
+    <partial name="_CookieConsentPartial" />
+    <div id="wrapper">
+        <nav class="navbar-default navbar-static-side" role="navigation">
+            <div class="sidebar-collapse">
+                <ul class="nav metismenu" id="side-menu">
+                    <li class="nav-header">
+                        <div class="dropdown profile-element">
+                            <span>
+                                <img alt="image" class="img-circle" src="~/img/default-avatar.png" style="width:50px;" />
+                            </span>
+                            <a data-toggle="dropdown" href="#">
+                                <span class="clear">
+                                    <span class="block m-t-xs">
+                                        <strong class="font-bold">@User.Identity.GetFullName()</strong>
+                                    </span> <span class="text-muted text-xs block">@User.Identity.GetDepartmentName() </span>
+                                </span>
+                            </a>
+
+                        </div>
+                        <div class="logo-element">
+                            IN+
+                        </div>
+                    </li>
+                    <li class="active">
+                        <a href="@Url.Action("Index","Home")"><i class="fa fa-th-large"></i> <span class="nav-label">Dashboard</span> </a>
+
+                    </li>
+
+                    <li>
+                        <a href="#"><i class="fa fa-edit"></i> <span class="nav-label">Forms</span><span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a asp-area="" asp-controller="MDDAF" asp-action="Index">MDDAF</a></li>
+                            <li><a asp-area="" asp-controller="WDIF" asp-action="Index">WDIF</a></li>
+                            <li><a asp-area="" asp-controller="PO" asp-action="Index">PO</a></li>
+                            <li><a asp-area="" asp-controller="Rejected" asp-action="Index"> Notice of Rejection</a></li>
+                            <li><a asp-area="" asp-controller="GatePass" asp-action="Index"> Gate Pass</a></li>
+                        </ul>
+
+                    </li>
+                    <li><a asp-area="" asp-controller="Reports" asp-action="Index"><i class="fa fa-line-chart"></i> <span class="nav-label">Reports</span></a></li>
+                    <li>
+                        <a href="#"><i class="fa fa-edit"></i> <span class="nav-label">Maintenance</span><span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a asp-area="" asp-controller="UOM" asp-action="Index">UOM</a></li>
+                            <li><a asp-area="" asp-controller="Companies" asp-action="Index">Company</a></li>
+                            <li><a asp-area="" asp-controller="Departments" asp-action="Index">Department</a></li>
+                            <li><a asp-area="" asp-controller="EquipmentTypes" asp-action="Index">Equipment Type</a></li>
+
+                            <li><a asp-area="" asp-controller="Users" asp-action="Index">User </a></li>
+
+                        </ul>
+                    </li>
+                  
+                </ul>
+
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="gray-bg dashbard-1" style=" min-height: 1500px !important;">
+            <div class="row border-bottom">
+                <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+                    <div class="navbar-header">
+                        <a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="#"><i class="fa fa-bars"></i> </a>
+                    </div>
+                        <ul class="nav navbar-top-links navbar-right">
+                            <li>
+                                <span class="m-r-sm text-muted welcome-message">Welcome to ICAR System</span>
+                            </li>
+
+
+                            <li>
+                                @using (Html.BeginForm("LogOff", "Accounts", FormMethod.Post, new { id = "logoutForm" }))
+                                {
+                                    @Html.AntiForgeryToken()
+
+                                    <a href="javascript:document.getElementById('logoutForm').submit()">
+
+                                        <i class="fa fa-sign-out"></i> Log off
+                                    </a>
+
+
+                                }
+                            </li>
+                            <li>
+                                <a class="right-sidebar-toggle">
+                                    <i class="fa fa-tasks"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    
+                </nav>
+
+            </div>
+
+
+            <div class="row wrapper border-bottom white-bg page-heading">
+                <div class="col-lg-10">
+                    <h2>@ViewBag.Title</h2>
+
+                    <breadcrumb asp-homepage-title="Home"
+                                asp-homepage-url="@Url.Action("Index", "Home" , values: new { area="" })"
+                                asp-bootstrap-version="V3"></breadcrumb>
+                </div>
+                <div class="col-lg-2">
+
+                </div>
+            </div>
+
+
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="wrapper wrapper-content animated fadeInRight">
+                        <div id="loadingScreen" class="loadingWrapper" style="display:none;">
+                            <div id="loadingContent">
+                                <br>
+                                <img src="~/assets/big-spinner.gif"><br>
+                                Please wait
+                            </div>
+                        </div>
+
+                        @RenderBody()
+                    </div>
+                </div>
+            </div>
+
+
+            @*<div class="footer">
+                <div class="pull-right">
+                    10GB of <strong>250GB</strong> Free.
+                </div>
+                <div>
+                    <strong>Copyright</strong> Example Company © 2014-2015
+                </div>
+            </div>*@
+
+        </div>
+
+
+
+
+
+
+
+    </div>
+
+
+    @*<script src="~/js/core/jquery.min.js"></script>*@
+
+    <script src="~/js/plugins/bootstrap.min.js"></script>
+    <script src="~/js/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="~/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+    <script src="~/js/inspinia.js"></script>
+    <script src="~/js/plugins/pace/pace.min.js"></script>
+    <script src="~/js/plugins/dataTables/jquery.dataTables.min.js"></script>
+    <script src="~/js/plugins/toastr/toastr.min.js"></script>
+
+    <script src="~/js/plugins/datapicker/moment.min.js"></script>
+    <script src="~/js/plugins/dataTables/dataTables.checkboxes.min.js"></script>
+
+    <script>
+        $(document).ajaxStart(function () {
+            $("#loadingScreen").fadeIn();
+        }).ajaxStop(function () {
+            $("#loadingScreen").fadeOut();
+        });
+    </script>
+    @*<script src="~/js/plugins/datapicker/bootstrap-datetimepicker.min.js"></script>*@
+
+</body>
+</html>

@@ -1,0 +1,269 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+
+<style>
+    tfoot input {
+        width: 100%;
+        padding: 3px;
+        box-sizing: border-box;
+    }
+
+    #tbl_filter {
+        display: none;
+    }
+</style>
+
+
+<div id="modalDepartment" class="modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Department Details</h5>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" class="form-control" name="Id" id="Id">
+                <div class="form-group">
+                    <label for="code" class="col-form-label">Code</label>
+                    <input type="text" class="form-control" name="Code" id="Code">
+                </div>
+                <div class="form-group">
+                    <label for="Name" class="col-form-label">Name</label>
+                    <input type="text" class="form-control" name="Name" id="Name">
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Status</label>
+                    <select id="Status" name="Status" style="width:100%" class="form-control">
+                        <option value="Active">Active</option>
+                        <option value="In-Active">In-Active</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-primary" id="btnSubmit">Submit</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<div class="card">
+    <div class="card-body">
+        <p>
+            <a data-toggle="modal" data-target="#modalDepartment" id="btnCreate" >Create New</a>
+        </p>
+
+        <table id="tbl" class="table table-striped table-no-bordered table-hover dataTable" style="width: 100%!important">
+            <thead>
+                <tr>
+                    <th style="width:20%">Code</th>
+                    <th>Name</th>
+                    <th>Status</th>
+                    <th style="width:10%">Actions</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<script>
+    $(function () {
+
+        $("input[type=text]").keyup(function () {
+            $(this).val($(this).val().toUpperCase());
+        });
+    })
+    var $ttype = "new";
+    function clear() {
+        $('#Id').val(0);
+        $('#Code').val("");
+        $('#Name').val("");
+        $('#Status').val("Active");
+    }
+
+    $('#btnCreate').click(function () {
+        clear();
+        $ttype = "new";
+        //$('#grpConcessionaire').show();
+    });
+
+
+    $(function () {
+        reload();
+    })
+
+    $('#tbl thead tr:eq(1) th').each(function () {
+        var title = $(this).text();
+
+        if (title == "" ) {
+            $(this).html('');
+        } else {
+
+
+                $(this).html('<input type="text" class="form-control form-control-md" placeholder="Search ' + title + '" />');
+
+
+        }
+
+    });
+    
+
+
+    $('#btnSubmit').click(function () {
+       
+        //$office = $("#ppeOffice").val();
+        //$field = $("#ppeField").val();
+
+
+         $.ajax({
+             url: "@Url.Action("CreateUpdate")?Ttype=" + $ttype
+                , method: "POST"
+                , dataType: 'json'
+                , data: {
+                     ID : $('#Id').val(),
+                     Code: $('#Code').val(),
+                    Name: $('#Name').val(),
+                    Status: $('#Status').val()
+
+                     
+                }
+                , success: function (responsedata) {
+                    if (responsedata.status == "success") {
+                        toastr["success"]("Data saved!", "<b>Success</b> ")
+                        reload();
+                    } else {
+                        toastr["error"](responsedata.message)
+                        toastr.options = {
+                            "closeButton": true,
+                            "showDuration": "3000",
+                        }
+                        reload();
+                        //swal("Error!" + responsedata.message, "Please try again", "error");
+                    }
+                }
+            });
+    });
+    function reload() {
+        var data = [];
+        if ($.fn.DataTable.isDataTable('#tbl')) {
+            $('#tbl').DataTable().destroy();
+        }
+
+      
+
+         $.ajax({
+                        url: "@Url.Action("getData")"
+                            , method: "POST"
+                            , dataType: 'json'
+
+                            , success: function (responsedata) {
+                               
+                                if (responsedata.status == "success") {
+
+
+                                    for (var i = 0; i < responsedata.data.length; i++) {
+
+                                        var $id = responsedata.data[i].id;
+                                        var $code = responsedata.data[i].code;
+                                        var $name = responsedata.data[i].name;
+                                        var $status = responsedata.data[i].status;
+
+
+                                        $actions =
+                                            "<a title='Edit' " +
+                                            " data-id=" + $id + " data-code='" + $code +
+                                            "' data-name='" + $name + "' data-status='" + $status +
+                                            "' onclick='showmodal(this);'>Edit</a>&nbsp" +
+                                            "<a title='Delete' onclick='deleteItemdetail(" + $id + ");'>Delete</a>";
+                                            //'<a  onclick="deleteItemdetail(' + $id + ');"><i class="menu-icon mdi mdi-delete"></i></a>';
+                                              data.push([$code
+                                                  , $name
+                                                  , $status
+                                            ,$actions]);
+
+                                    }
+
+                                    $('#tbl').DataTable({
+                                        "data" : data,
+                                        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+                                        "columnDefs": [
+                                            //{ className: "td-actions text-right", targets: 1}
+                                        ],
+                                    });
+                                } else {
+                                   //swal("Error!" + responsedata.message, "Please try again", "error");
+                                }
+
+                            }
+        });
+    }
+
+
+    
+
+
+    function showmodal(obj) {
+        $id = $(obj).attr('data-id');
+        $code = $(obj).attr('data-code');
+        $name = $(obj).attr('data-name');
+        $status = $(obj).attr('data-status');
+        $("#Id").val($id);
+        $("#Code").val($code);
+        $("#Name").val($name);
+        $("#Status").val($status);
+        $('#modalDepartment').modal('show');
+        $ttype = "update";
+
+
+    }
+   
+
+    function deleteItemdetail(id) {
+        
+        if ((confirm('Are you sure you want to delete this data from the database?'))) {
+                 $.post("@Url.Action("Delete")", {id:id}
+                       , function (responseData) {
+                           if (responseData.status == "success") {
+                               toastr["success"]("Data saved!", "<b>Success</b> ")
+                               reload();
+                           } else {
+                               toastr["error"](responsedata.message)
+                               toastr.options = {
+                                   "closeButton": true,
+                                   "showDuration": "3000",
+                               }
+                           }
+                       });
+            } else {
+                toastr["error"](responsedata.message)
+                toastr.options = {
+                    "closeButton": true,
+                    "showDuration": "3000",
+                }
+               //swal("Transaction cancelled!");
+            }
+
+
+
+
+
+
+
+    }
+
+
+
+
+</script>
+
+
+
+
+
+

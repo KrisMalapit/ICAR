@@ -1,0 +1,286 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
+<style>
+    .modal-lg {
+        width: 60% !important
+    }
+
+</style>
+<title>@ViewData["Title"] </title>
+
+
+
+<div class="row">
+    <div class="col-lg-3">
+        <div class="ibox float-e-margins">
+            <div class="ibox-title">
+
+
+                <h5>Pending for Review</h5>
+            </div>
+            <div class="ibox-content">
+                <h1 class="no-margins"> 0</h1>
+
+                <div class="stat-percent font-bold text-success"> <i class="fa fa-search" style="font-size: 3.4em; line-height: 0px; letter-spacing: 0.002em; font-weight: 500;"></i></div>
+                <br />
+                <a href="#" onclick="loadData(1);">View Details</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="ibox float-e-margins">
+            <div class="ibox-title">
+
+                <h5>Pending For Inspection</h5>
+            </div>
+            <div class="ibox-content">
+                <h1 class="no-margins">0</h1>
+                <div class="stat-percent font-bold text-success"> <i class="fa fa-check" style="font-size: 3.4em; line-height: 0px; letter-spacing: 0.002em; font-weight: 500;"></i></div>
+                <br />
+                <a href="#" onclick="loadData(2);">View Details</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="ibox float-e-margins">
+            <div class="ibox-title">
+
+                <h5>Rejected Deliveries</h5>
+            </div>
+            <div class="ibox-content">
+                <h1 class="no-margins">0</h1>
+                <div class="stat-percent font-bold text-success"> <i class="fa fa-truck" style="font-size: 3.4em; line-height: 0px; letter-spacing: 0.002em; font-weight: 500;"></i></div>
+                <br />
+                <a href="#" onclick="loadData(0);">View Details</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3">
+        <div class="ibox float-e-margins">
+            <div class="ibox-title">
+
+                <h5>Pending for Approval</h5>
+            </div>
+            <div class="ibox-content">
+                <h1 class="no-margins">0</h1>
+                <div class="stat-percent font-bold text-success"> <i class="fa fa-bell" style="font-size: 3.4em; line-height: 0px; letter-spacing: 0.002em; font-weight: 500;"></i></div>
+                <br />
+                <a href="#" onclick="loadData(3);">View Details</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<script>
+   
+    function loadData(id) {
+
+
+
+        if (id == 1) {
+             $("#modalTitle").html("Pending For Review");
+        } else if (id == 2) {
+             $("#modalTitle").html("Pending For Inspection");
+        }
+        else if (id == 0) {
+             $("#modalTitle").html("Rejected Deliveries");
+        }else  {
+             $("#modalTitle").html("Pending for Approval");
+        }
+
+       var data = [];
+
+        $.ajax({
+            url: "@Url.Action("getDataWDIF","Home")"
+            , method: "POST"
+            , dataType: 'json'
+            , data: { docStatId: id}
+            , success: function (responsedata) {
+
+
+                                if (responsedata.status == "success") {
+
+
+                                    for (var i = 0; i < responsedata.data.length; i++) {
+
+                                        var $id = responsedata.data[i].id;
+                                        var linkDetails = "@Url.Action("Details", "WDIF")?id=" + $id;
+
+                                        if (id == 0) {
+                                            linkDetails = "@Url.Action("Details", "Rejected")?mddafId=" + responsedata.data[i].mddafId;
+                                        } else {
+                                            linkDetails = "@Url.Action("Details", "WDIF")?id="+ $id;
+                                        }
+                                        var linkDelete = "@Url.Action("Delete", "WDIF")?id=" + $id;
+
+                                        $actions =
+                                            //'<a title="Edit" class="btn btn-white btn-bitbucket" href="' + linkEdit + '"><i class="fa fa-wrench"></i></a> ' +
+                                            '<a title="Details" class="btn btn-info btn-bitbucket" href="' + linkDetails + '"><i class="fa fa-list"></i></a> ';
+                                            //'<a title="Delete" class="btn btn-danger btn-bitbucket" href="' + linkDelete + '"><i class="fa fa-trash"></i></a>';
+                                        data.push([
+                                              responsedata.data[i].id
+                                            , responsedata.data[i].no
+                                            , responsedata.data[i].mddafNo
+                                            , responsedata.data[i].poNo
+                                            , responsedata.data[i].status
+                                            , $actions]
+                                        );
+
+                                    }
+
+
+                                    if ($.fn.DataTable.isDataTable('#tbl')) {
+                                        $('#tbl').DataTable().destroy();
+
+                                    }
+
+
+
+                                    $('#tbl').DataTable({
+                                        "data": data,
+                                        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+                                        "columnDefs": [
+                                            {
+                                                'targets': 0,
+                                                'orderable' : false,
+                                                'checkboxes': {
+                                                    'selectRow': true
+                                                }
+                                            },
+                                             {
+                                                'targets': 5,
+                                                'orderable': false
+                                            }
+                                            //{ className: "td-actions text-right", targets: 1}
+                                        ],
+                                        'select': {
+                                            'style': 'multi'
+                                        },
+                                        order: [1, 'asc'],
+                                    });
+
+                                    $("#type").val(id);
+                                    if (id == 2) {
+                                        $("#btnApprove").attr('disabled',true)
+                                    }
+                                    if (id == 0) {
+                                        $("#btnApprove").hide();
+                                    }
+
+                                    $("#modalItem").modal("show");
+
+
+
+                                } else {
+                                    toastr["error"](responsedata.message)
+                                    toastr.options = {
+                                        "closeButton": true,
+                                        "showDuration": "3000",
+                                    }
+                                }
+
+            }
+        })
+
+
+
+
+    }
+    function proceed() {
+        $id = $("#type").val();
+        console.log($id);
+
+
+        var table = $('#tbl').DataTable();
+        var rows_selected = table.column(0).checkboxes.selected();
+        data = [];
+
+        $.each(rows_selected, function (index, rowId) {
+            data.push(rowId );
+
+        });
+
+        if (data.length < 1) {
+            toastr["error"]("No item selected")
+            toastr.options = {
+                "closeButton": true,
+                "showDuration": "3000",
+            };
+        } else {
+            if ($id == 1) {
+                $.ajax({
+                url: "@Url.Action("ApproveWDIF","WDIF")"
+                    , method: "POST"
+                    , data: { id:data }
+                    , dataType: 'json'
+                    , success: function (responsedata) {
+                        if (responsedata.status == "success") {
+                            toastr["success"]("Data approved!", "<b>Success</b> ")
+                            loadData($id);
+                        } else {
+                            toastr["error"](responsedata.message)
+                            toastr.options = {
+                                "closeButton": true,
+                                "showDuration": "3000",
+                            }
+                        }
+                    }
+               })
+            }
+             if ($id == 3) {
+                $.ajax({
+                url: "@Url.Action("SaveWDIFDeptHead", "WDIF")"
+                    , method: "POST"
+                    , data: { id:data }
+                    , dataType: 'json'
+                    , success: function (responsedata) {
+                        if (responsedata.status == "success") {
+                            toastr["success"]("Data approved!", "<b>Success</b> ")
+                            loadData($id);
+                        } else {
+                            toastr["error"](responsedata.message)
+                            toastr.options = {
+                                "closeButton": true,
+                                "showDuration": "3000",
+                            }
+                        }
+                    }
+               })
+            }
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+
+        $(document).ready(function () {
+            setTimeout(function () {
+                toastr.options = {
+                    closeButton: true,
+                    progressBar: true,
+                    showMethod: 'slideDown',
+                    timeOut: 4000
+                };
+                toastr.success('Success', 'Welcome to ICAR System');
+
+            }, 1300);
+
+        });
+</script>
